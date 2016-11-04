@@ -1,0 +1,63 @@
+#!/bin/bash
+
+get_upstream_version() {
+
+        arch_wget=i686
+        [ `dpkg --print-architecture` != "amd64" ] || arch_wget=x86_64
+
+        upstream=""
+
+        if [ -f $cachedir/get-upstream-version.pl ]
+        then
+                if [ "`stat --format=%y $cachedir/get-upstream-version.pl`" \< "2016-08-04 09:35" ]
+                then
+                        [ "$verbose" != "yes" ] || echo "deleting old $cachedir/get-upstream-version.pl"
+                        rm $cachedir/get-upstream-version.pl
+                fi
+        fi
+
+        if [ -f $cachedir/get-upstream-version.pl ]
+        then
+                cp $cachedir/get-upstream-version.pl .
+                upstream=`perl get-upstream-version.pl $arch_wget 2> /dev/null` || true
+                if [ "$upstream" = "" ]
+                then
+                        rm -f get-upstream-version.pl
+                        rm -f $cachedir/get-upstream-version.pl
+                fi
+        fi
+
+        if [ "$upstream" = "" ]
+        then
+                wgetoptions="$wgetquiet $wgetalways"
+                downloadurl=http://people.debian.org/~bartm/flashplugin-nonfree/D5C0FC14/get-upstream-version.pl.gz.pgp
+
+                HOME=/root \
+                wget $wgetoptions $downloadurl \
+                        || die_hard_with_a_cleanup "wget failed to download $downloadurl"
+
+                gpg -q --homedir "." --verify get-upstream-version.pl.gz.pgp 2> /dev/null \
+                        || die_hard_with_a_cleanup "gpg rejected signature of get-upstream-version.pl.gz.pgp"
+                gpg -q --homedir "." < get-upstream-version.pl.gz.pgp > get-upstream-version.pl.gz 2> /dev/null \
+                        || die_hard_with_a_cleanup "gpg rejected signature of get-upstream-version.pl.gz.pgp"
+
+                gunzip get-upstream-version.pl.gz \
+                        || die_hard_with_a_cleanup "failed to gunzip get-upstream-version.pl.gz"
+
+                upstream=`perl get-upstream-version.pl $arch_wget` \
+                        || die_hard_with_a_cleanup "failed to get upstream version"
+
+                cp get-upstream-version.pl $cachedir
+        fi
+}
+get_upstream_version
+rm pubring.kbx
+rm get-upstream-version.pl
+rm get-upstream-version.pl.gz.pgp
+wget https://fpdownload.adobe.com/get/flashplayer/pdc/$upstream/install_flash_player_11_linux.x86_64.tar.gz
+tar -xzvf install_flash_player_11_linux.x86_64.tar.gz
+rm install_flash_player_11_linux.x86_64.tar.gz
+rm -r usr
+rm -r LGPL
+rm readme.txt
+mv libflashplayer.so /usr/lib/mozilla/plugins/
