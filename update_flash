@@ -54,10 +54,11 @@ get_upstream_version
 rm pubring.kbx
 rm get-upstream-version.pl
 rm get-upstream-version.pl.gz.pgp
-wget https://fpdownload.adobe.com/get/flashplayer/pdc/$upstream/install_flash_player_11_linux.x86_64.tar.gz
-tar -xzvf install_flash_player_11_linux.x86_64.tar.gz
-rm install_flash_player_11_linux.x86_64.tar.gz
+wget https://fpdownload.adobe.com/get/flashplayer/pdc/$upstream/flash_player_npapi_linux.x86_64.tar.gz
+tar -xzvf flash_player_npapi_linux.x86_64.tar.gz
+rm flash_player_npapi_linux.x86_64.tar.gz
 rm -r usr
 rm -r LGPL
 rm readme.txt
+rm license.pdf
 mv libflashplayer.so /usr/lib/mozilla/plugins/
