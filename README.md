@@ -9,3 +9,9 @@ Bash script to automatically update Flash Player on Linux Systems like Kali Linu
 5. Add to the bottom of file: ```30 12 * * * /usr/bin/update_flash```
 
 Your Flash Player plugin will now automatically upgrade every day at 12:30
+
+## Known issues
+###Issue:
+In some cases you see an old version of Flash Player installed along with the new one that is causing trouble.
+###Solution:
+Remove the old libflashplayer.so file ```rm ~/.mozilla/plugins/libflashplayer.so```
